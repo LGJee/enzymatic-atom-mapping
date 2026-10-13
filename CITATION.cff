@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "Please cite the version and exact commit used, together with the sources supporting individual mappings."
+title: "Enzymatic Atom Mapping: an evidence-guided agent skill"
+type: software
+authors:
+  - family-names: "LGJee"
+version: 0.1.0
+date-released: 2026-10-13
+license: MIT
+repository-code: "https://github.com/LGJee/enzymatic-atom-mapping"
+url: "https://github.com/LGJee/enzymatic-atom-mapping"
+abstract: "A Codex skill for evidence-guided enzymatic carbon atom mapping, supported by an RDKit structural validator. Structural validity is distinguished from biochemical correctness."
