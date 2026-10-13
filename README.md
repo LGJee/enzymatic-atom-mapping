@@ -1,4 +1,4 @@
-# Enzymatic Atom Mapping
+# Enzymatic Atom Mapping Skill
 
 An English-language Codex skill for evidence-guided atom mapping of enzymatic
 reaction SMILES, with particular emphasis on carbon transfer.
