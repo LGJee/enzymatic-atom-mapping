@@ -8,12 +8,59 @@ validator. It is **not** a pretrained mapper, an automatic literature oracle, or
 a guarantee of exact isotope trajectories. A structurally consistent mapping
 can still be mechanistically wrong.
 
-## Install and invoke
+## Installation
 
-Copy this repository into your Codex skills directory as
-"enzymatic-atom-mapping" (normally ~/.codex/skills/enzymatic-atom-mapping).
-Do not overwrite an existing skill without reviewing it. In a new session,
-invoke it with:
+### Install automatically with Codex (recommended)
+
+Open Codex and paste this request into the chat:
+
+~~~text
+Use $skill-installer to install the skill from:
+https://github.com/LGJee/enzymatic-atom-mapping
+
+The SKILL.md file is at the repository root. Install that root directory
+as a skill named enzymatic-atom-mapping in my user skills directory.
+If using install-skill-from-github.py, use:
+--repo LGJee/enzymatic-atom-mapping --path . --name enzymatic-atom-mapping
+~~~
+
+Codex uses its bundled installer to download the files and install the skill.
+Allow network access if your Codex permission settings require it. No manual
+download or Git command is needed. If the skill is already installed, the
+installer stops instead of overwriting it; ask Codex to review an update.
+
+The skill should be available on your next turn. If it does not appear,
+restart Codex. See the [official skill installation guide](https://learn.chatgpt.com/docs/build-skills#install-curated-skills-for-local-use).
+
+### Install manually
+
+Alternatively, download this repository using **Code > Download ZIP**, extract
+it, and rename the extracted folder to `enzymatic-atom-mapping`. Place the folder
+in your Codex user skills directory:
+
+- Current documented location: `~/.agents/skills/` on macOS/Linux, or
+  `%USERPROFILE%\.agents\skills\` on Windows.
+- Releases whose bundled installer uses `$CODEX_HOME/skills` default to
+  `~/.codex/skills/`, or `%USERPROFILE%\.codex\skills\` on Windows.
+
+Use the location supported by your Codex installation, and install only one
+copy. `SKILL.md` must be directly inside `enzymatic-atom-mapping`, not in an extra
+nested folder. Do not overwrite an existing skill without reviewing it.
+
+### Dependencies
+
+Installing the skill does not install Python, RDKit, or optional mapper models.
+For automated structural validation, use Python 3.9 or later with RDKit; see
+[Validate a candidate](#validate-a-candidate) below. You can also ask Codex:
+
+~~~text
+Check the dependencies for $enzymatic-atom-mapping and install RDKit in a
+dedicated environment if it is missing. Run the bundled validator tests.
+~~~
+
+## Use the skill
+
+After installation, paste a request such as:
 
 ~~~text
 Use $enzymatic-atom-mapping to establish the carbon atom correspondence for:
