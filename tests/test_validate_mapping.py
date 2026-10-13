@@ -36,7 +36,7 @@ class MappingChecks(unittest.TestCase):
             carbon_map(FBP, [6, 5, 4, 3, 2, 1]) + ">>" +
             carbon_map(DHAP, [3, 2, 1]) + "." + carbon_map(GAP, [6, 5, 4])
         )
-        report = validate(REACTION, mapped)
+        report = validate(REACTION, mapped, scope="carbon")
         self.assertEqual(report["status"], "structural_checks_passed")
         self.assertEqual(report["product_coverage"]["mapped_carbon_atoms"], 6)
         self.assertEqual(
@@ -54,7 +54,8 @@ class MappingChecks(unittest.TestCase):
             "[CH3:1][CH2:2][OH:3].[OH:4][P:5](=[O:6])([OH:7])[OH:8]"
             ">>[CH3:1][CH2:2][O:3][P:5](=[O:6])([OH:7])[OH:8].[OH2:4]"
         )
-        report = validate(original, mapped, "heavy")
+        report = validate(original, mapped)
+        self.assertEqual(report["scope"], "all")
         self.assertTrue(report["input_balance"]["balanced"])
         self.assertEqual(report["product_coverage"]["mapped_heavy_atoms"], 8)
 
@@ -63,7 +64,7 @@ class MappingChecks(unittest.TestCase):
         right = "OCC(=O)COP(=O)(O)O"
         report = validate(left + ">>" + right,
                           carbon_map(left, [1, 2, 3]) + ">>" +
-                          carbon_map(right, [1, 2, 3]))
+                          carbon_map(right, [1, 2, 3]), scope="carbon")
         self.assertTrue(report["input_balance"]["balanced"])
 
     def test_symmetric_representatives(self):
@@ -71,11 +72,11 @@ class MappingChecks(unittest.TestCase):
         for numbers in ([1, 2, 3, 4], [4, 3, 2, 1]):
             result = validate(succinate + ">>" + succinate,
                               carbon_map(succinate, [1, 2, 3, 4]) + ">>" +
-                              carbon_map(succinate, numbers))
+                              carbon_map(succinate, numbers), scope="carbon")
             self.assertEqual(result["status"], "structural_checks_passed")
 
     def test_repeated_components_need_distinct_identifiers(self):
-        validate("CO.CO>>CO.CO", "[CH3:1]O.[CH3:2]O>>[CH3:1]O.[CH3:2]O")
+        validate("CO.CO>>CO.CO", "[CH3:1]O.[CH3:2]O>>[CH3:1]O.[CH3:2]O", scope="carbon")
         with self.assertRaisesRegex(ValueError, "Duplicate"):
             validate("CO.CO>>CO.CO", "[CH3:1]O.[CH3:1]O>>[CH3:1]O.[CH3:2]O")
 
@@ -87,7 +88,7 @@ class MappingChecks(unittest.TestCase):
         for candidate in ("[CH3:1]CO>>[CH3:1][CH2:2]O",
                           "[CH3:1][CH2:2]O>>[CH3:1][CH2:3]O"):
             with self.assertRaises(ValueError):
-                validate("CCO>>CCO", candidate)
+                validate("CCO>>CCO", candidate, scope="carbon")
 
     def test_component_multiplicity_preserved(self):
         with self.assertRaisesRegex(ValueError, "multiplicity"):
@@ -104,6 +105,24 @@ class MappingChecks(unittest.TestCase):
                      carbon_map(lactate, [1, 2, 3]) + ">>" +
                      carbon_map("C[C@@H](O)C(=O)O", [1, 2, 3]))
 
+    def test_default_requires_non_carbon_atoms(self):
+        with self.assertRaisesRegex(ValueError, "positive map identifier"):
+            validate("CO>>CO", "[CH3:1]O>>[CH3:1]O")
+        result = validate("CO>>CO", "[CH3:1][OH:2]>>[CH3:1][OH:2]")
+        self.assertEqual(result["scope"], "all")
+        self.assertEqual(result["reactant_coverage"]["represented_atoms"], 2)
+
+    def test_default_includes_explicit_hydrogen(self):
+        reaction = "[H]OC>>[H]OC"
+        complete = "[H:3][O:2][CH3:1]>>[H:3][O:2][CH3:1]"
+        result = validate(reaction, complete)
+        self.assertEqual(result["reactant_coverage"]["mapped_explicit_hydrogen_atoms"], 1)
+        self.assertEqual(result["reactant_coverage"]["mapped_represented_atoms"], 3)
+        incomplete = "[H][O:2][CH3:1]>>[H][O:2][CH3:1]"
+        with self.assertRaisesRegex(ValueError, "positive map identifier"):
+            validate(reaction, incomplete)
+        self.assertEqual(validate(reaction, incomplete, scope="heavy")["scope"], "heavy")
+
     def test_invalid_input(self):
         for reaction in ("CCO", "CCO>>", "*CO>>*CO", "CO name>>CO", "C1CC>>CC"):
             with self.assertRaises(ValueError):
@@ -112,12 +131,12 @@ class MappingChecks(unittest.TestCase):
     def test_structure_checks_cannot_certify_carbon_positions(self):
         # A carbon permutation can pass bookkeeping while lacking mechanistic support.
         result = validate("CCCO>>CCC=O",
-                          "[CH3:1][CH2:2][CH2:3]O>>[CH3:3][CH2:2][CH:1]=O")
+                          "[CH3:1][CH2:2][CH2:3]O>>[CH3:3][CH2:2][CH:1]=O", scope="carbon")
         self.assertEqual(result["status"], "structural_checks_passed")
         self.assertEqual(result["mechanistic_correctness"], "not_assessed")
 
     def test_explicit_ordinary_hydrogens_are_equivalent(self):
-        result = validate("CO>>CO", "[CH3:1]O>>[H]O[CH3:1]")
+        result = validate("CO>>CO", "[CH3:1]O>>[H]O[CH3:1]", scope="carbon")
         self.assertEqual(result["status"], "structural_checks_passed")
 
 

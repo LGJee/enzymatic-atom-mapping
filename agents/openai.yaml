@@ -1,4 +1,4 @@
 interface:
   display_name: "Enzymatic Atom Mapping"
-  short_description: "Evidence-guided carbon mapping for enzymatic reactions"
-  default_prompt: "Use $enzymatic-atom-mapping to map this enzymatic reaction using biochemical evidence."
+  short_description: "Evidence-guided all-atom mapping for enzyme reactions"
+  default_prompt: "Use $enzymatic-atom-mapping to map all atoms represented in this enzymatic reaction SMILES using biochemical evidence, and identify representative or unresolved assignments."

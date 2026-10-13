@@ -1,6 +1,6 @@
 # Enzymatic Atom Mapping Skill
 
-Find which product carbon atoms come from which reactants in an enzyme reaction.
+Map all atoms represented in an enzymatic reaction SMILES by default: all heavy atoms and explicit hydrogen atoms. Implicit hydrogens remain implicit.
 This Codex skill uses biochemical sources and a small structural checker.
 It is an evidence-guided workflow, not a trained prediction model.
 
@@ -54,8 +54,8 @@ is unclear. You can ask in Chinese or English; results are currently in English.
 
 ## What you get
 
-- A table showing which reactant carbons correspond to which product carbons.
-- An atom-mapped reaction SMILES when the evidence supports it.
+- A table showing reactant-to-product atom correspondences for all mapped elements.
+- An atom-mapped reaction SMILES with complete coverage when justified; symmetry-equivalent or model-only assignments are identified as representative or unverified.
 - Source links and a clear explanation of any unresolved atom positions.
 
 The agent needs web access for research. LocalMapper, RXNMapper, and EnzymeMap
@@ -87,15 +87,16 @@ Use Python 3.9 or later with RDKit. Run these from the repository root:
 ~~~bash
 conda create -n atom-mapping python=3.11 rdkit -c conda-forge
 conda activate atom-mapping
-python scripts/validate_mapping.py --reaction 'CCO>>CCO' --mapped '[CH3:1][CH2:2]O>>[CH3:1][CH2:2]O'
+python scripts/validate_mapping.py --reaction 'CCO>>CCO' --mapped '[CH3:1][CH2:2][OH:3]>>[CH3:1][CH2:2][OH:3]'
 python -m unittest discover -s tests -v
 ~~~
 
 Alternatively, use `python -m pip install -r requirements.txt` in an existing
 Python environment. Codex can also help check and install missing dependencies.
 
-The checker accepts `--reaction`, optional `--mapped`, and `--scope carbon`
-(default) or `--scope heavy`. It checks structure preservation, component
+The checker accepts `--reaction`, optional `--mapped`, and `--scope all`
+(default, heavy atoms plus explicit H). Use `--scope heavy` or `--scope carbon`
+for a deliberately narrower check. It checks structure preservation, component
 multiplicity, charges, isotopes, stereochemistry, map identifiers, and atom
 coverage. Input imbalance is reported without silently correcting it.
 

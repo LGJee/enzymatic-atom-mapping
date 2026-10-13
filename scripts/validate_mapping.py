@@ -68,9 +68,9 @@ def map_index(molecules):
     return index
 
 
-def validate_mapping(reaction, mapped=None, scope="carbon"):
-    if scope not in ("carbon", "heavy"):
-        raise ValueError("Scope must be carbon or heavy.")
+def validate_mapping(reaction, mapped=None, scope="all"):
+    if scope not in ("all", "carbon", "heavy"):
+        raise ValueError("Scope must be all, heavy, or carbon.")
     original = parse_reaction(reaction)
     inventories = [inventory(side) for side in original]
     element_delta = difference(inventories[0][0], inventories[1][0])
@@ -114,11 +114,17 @@ def validate_mapping(reaction, mapped=None, scope="carbon"):
     for side in candidate:
         carbons = [a for m in side for a in m.GetAtoms() if a.GetAtomicNum() == 6]
         heavy = [a for m in side for a in m.GetAtoms() if a.GetAtomicNum() > 1]
-        required = carbons if scope == "carbon" else heavy
+        atoms = [a for m in side for a in m.GetAtoms()]
+        required = {"carbon": carbons, "heavy": heavy, "all": atoms}[scope]
         if any(a.GetAtomMapNum() <= 0 for a in required):
-            raise ValueError("Every {} atom must have a positive map identifier.".format(scope))
+            raise ValueError("Every atom in scope {} must have a positive map identifier.".format(scope))
         required_ids.append({a.GetAtomMapNum() for a in required})
+        hydrogens = [a for a in atoms if a.GetAtomicNum() == 1]
         coverage.append({
+            "represented_atoms": len(atoms),
+            "mapped_represented_atoms": sum(a.GetAtomMapNum() > 0 for a in atoms),
+            "explicit_hydrogen_atoms": len(hydrogens),
+            "mapped_explicit_hydrogen_atoms": sum(a.GetAtomMapNum() > 0 for a in hydrogens),
             "carbon_atoms": len(carbons),
             "mapped_carbon_atoms": sum(a.GetAtomMapNum() > 0 for a in carbons),
             "heavy_atoms": len(heavy),
@@ -141,7 +147,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reaction", required=True, help="Original reactant>>product SMILES")
     parser.add_argument("--mapped", help="Candidate atom-mapped reaction SMILES")
-    parser.add_argument("--scope", choices=("carbon", "heavy"), default="carbon")
+    parser.add_argument("--scope", choices=("all", "heavy", "carbon"), default="all",
+                        help="all: every represented atom, including explicit H (default); implicit H is not expanded")
     args = parser.parse_args()
     try:
         report = validate_mapping(args.reaction, args.mapped, args.scope)
