@@ -1,81 +1,98 @@
 # Enzymatic Atom Mapping Skill
 
-An English-language Codex skill for evidence-guided atom mapping of enzymatic
-reaction SMILES, with particular emphasis on carbon transfer.
+Find which product carbon atoms come from which reactants in an enzyme reaction.
+This Codex skill uses biochemical sources and a small structural checker.
+It is an evidence-guided workflow, not a trained prediction model.
 
-It combines an agent's biochemical research workflow with a small RDKit
-validator. It is **not** a pretrained mapper, an automatic literature oracle, or
-a guarantee of exact isotope trajectories. A structurally consistent mapping
-can still be mechanistically wrong.
+## Install
 
-## Installation
-
-### Install automatically with Codex (recommended)
-
-Open Codex and paste this request into the chat:
+Paste this into Codex:
 
 ~~~text
-Use $skill-installer to install the skill from:
-https://github.com/LGJee/enzymatic-atom-mapping-skill
-
-The SKILL.md file is at the repository root. Install that root directory
-as a skill named enzymatic-atom-mapping in my user skills directory.
-If using install-skill-from-github.py, use:
---repo LGJee/enzymatic-atom-mapping-skill --path . --name enzymatic-atom-mapping
+$skill-installer
+Install https://github.com/LGJee/enzymatic-atom-mapping-skill
+Use the repository root as the skill named enzymatic-atom-mapping.
 ~~~
 
-Codex uses its bundled installer to download the files and install the skill.
-Allow network access if your Codex permission settings require it. No manual
-download or Git command is needed. If the skill is already installed, the
-installer stops instead of overwriting it; ask Codex to review an update.
+It should be available on your next turn. If it does not appear, restart Codex.
+The installer does not overwrite an existing installation.
 
-The skill should be available on your next turn. If it does not appear,
-restart Codex. See the [official skill installation guide](https://learn.chatgpt.com/docs/build-skills#install-curated-skills-for-local-use).
+## Use
 
-### Install manually
+**Two steps: select the skill, then paste your reaction.**
 
-Alternatively, download this repository using **Code > Download ZIP**, extract
-it, and rename the extracted folder to `enzymatic-atom-mapping`. Place the folder
-in your Codex user skills directory:
+1. Select **Enzymatic Atom Mapping** in your skill picker, or type
+   `$enzymatic-atom-mapping`.
+2. Paste the reaction SMILES in the same message.
 
-- Current documented location: `~/.agents/skills/` on macOS/Linux, or
+~~~text
+$enzymatic-atom-mapping
+REACTANT_SMILES>>PRODUCT_SMILES
+~~~
+
+Replace the placeholder with your reaction. If you selected the skill in the
+picker, paste only the reaction.
+
+SMILES describes a molecule as text. `>>` separates reactants from products;
+`.` separates molecules on the same side. You do not need to number atoms first.
+
+**To check a mapping you already have:**
+
+~~~text
+$enzymatic-atom-mapping
+Check this mapping:
+MAPPED_REACTION_SMILES
+~~~
+
+No long prompt is needed. Looking up biochemical evidence, preserving your
+structures, and reporting uncertainty are already included in the skill.
+Reaction names and EC numbers are optional; Codex will ask if the identity
+is unclear. You can ask in Chinese or English; results are currently in English.
+
+## What you get
+
+- A table showing which reactant carbons correspond to which product carbons.
+- An atom-mapped reaction SMILES when the evidence supports it.
+- Source links and a clear explanation of any unresolved atom positions.
+
+The agent needs web access for research. LocalMapper, RXNMapper, and EnzymeMap
+are optional. Python with RDKit is needed only for automated structural checks.
+Installing the skill does not install these dependencies.
+
+<details>
+<summary>Copyable example: a sugar splits into two products</summary>
+
+~~~text
+$enzymatic-atom-mapping
+C([C@@H]1[C@H]([C@@H]([C@](O1)(COP(=O)([O-])[O-])O)O)O)OP(=O)([O-])[O-]>>C(C(=O)COP(=O)(O)O)O.C(C(C=O)O)OP(=O)(O)O
+~~~
+
+This example has different protonation states on the two sides.
+The skill should report the imbalance without changing your structures.
+
+</details>
+
+<details>
+<summary>Optional: manual installation</summary>
+
+Download **Code > Download ZIP**, extract it, rename the folder to
+`enzymatic-atom-mapping`, and place it in your Codex user skills directory:
+
+- Current documented location: `~/.agents/skills/`, or
   `%USERPROFILE%\.agents\skills\` on Windows.
-- Releases whose bundled installer uses `$CODEX_HOME/skills` default to
+- Versions whose bundled installer uses `$CODEX_HOME/skills` default to
   `~/.codex/skills/`, or `%USERPROFILE%\.codex\skills\` on Windows.
 
-Use the location supported by your Codex installation, and install only one
-copy. `SKILL.md` must be directly inside `enzymatic-atom-mapping`, not in an extra
-nested folder. Do not overwrite an existing skill without reviewing it.
+Use the location supported by your Codex installation and install only one
+copy. `SKILL.md` must be directly inside the skill folder.
+See the [official guide](https://learn.chatgpt.com/docs/build-skills).
 
-### Dependencies
+</details>
 
-Installing the skill does not install Python, RDKit, or optional mapper models.
-For automated structural validation, use Python 3.9 or later with RDKit; see
-[Validate a candidate](#validate-a-candidate) below. You can also ask Codex:
+<details>
+<summary>Advanced: run the structural checker and tests</summary>
 
-~~~text
-Check the dependencies for $enzymatic-atom-mapping and install RDKit in a
-dedicated environment if it is missing. Run the bundled validator tests.
-~~~
-
-## Use the skill
-
-After installation, paste a request such as:
-
-~~~text
-Use $enzymatic-atom-mapping to establish the carbon atom correspondence for:
-C([C@@H]1[C@H]([C@@H]([C@](O1)(COP(=O)([O-])[O-])O)O)O)OP(=O)([O-])[O-]>>C(C(=O)COP(=O)(O)O)O.C(C(C=O)O)OP(=O)(O)O
-Consult biochemical sources and primary literature. Preserve the supplied
-structures and report any unresolved atom identities.
-~~~
-
-The agent needs web access to consult the sources. RDKit is needed only for
-the bundled automated checks; candidate prediction tools are optional and are
-not bundled. No service credentials or research datasets are included.
-
-## Validate a candidate
-
-Use Python 3.9 or later with RDKit. For example:
+Use Python 3.9 or later with RDKit. Run these from the repository root:
 
 ~~~bash
 conda create -n atom-mapping python=3.11 rdkit -c conda-forge
@@ -84,52 +101,33 @@ python scripts/validate_mapping.py --reaction 'CCO>>CCO' --mapped '[CH3:1][CH2:2
 python -m unittest discover -s tests -v
 ~~~
 
-Alternatively, install the dependency with "python -m pip install -r requirements.txt".
-All commands above are run from the repository root.
+Alternatively, use `python -m pip install -r requirements.txt` in an existing
+Python environment. Codex can also help check and install missing dependencies.
 
-The CLI accepts --reaction, optional --mapped, and --scope carbon (default) or
---scope heavy. It returns JSON and exits with code 2 for invalid structures or
-mapping bookkeeping; code 0 means only that the requested machine checks
-passed. Input imbalance is reported as a warning without silently correcting
-the reaction.
+The checker accepts `--reaction`, optional `--mapped`, and `--scope carbon`
+(default) or `--scope heavy`. It checks structure preservation, component
+multiplicity, charges, isotopes, stereochemistry, map identifiers, and atom
+coverage. Input imbalance is reported without silently correcting it.
 
-Checks cover:
-- Recovery of the supplied structures after map removal, including component
-  multiplicity, formal charges, isotopes, and specified stereochemistry.
-- Unique positive map IDs on each side; consistent elements and isotopes for
-  identifiers shared across sides.
-- Complete, conserved carbon or heavy-atom identifiers for the selected scope.
-- Elemental, isotopic, and formal charge balance of the supplied input.
+It returns JSON. Exit code 2 means invalid structures or mapping bookkeeping;
+code 0 means only that the machine checks passed. These checks cannot establish
+the enzyme mechanism, resolve positional ambiguity, or certify accuracy.
 
-These checks do not determine a catalytic mechanism, resolve positional
-ambiguity, assess confidence, or establish correspondence of implicit hydrogens.
-Different SMILES traversals and component orderings are allowed if the
-underlying supplied structures are preserved.
-
-## Results and evidence
-
-The skill reports an evidence status, a scope-qualified mapped reaction,
-carbon-position correspondences, relevant EC/database identifiers, source
-links, and outstanding uncertainties. Atom-map numbers are reaction-local
-labels; they are not automatically biochemical carbon numbers.
-
-Source selection and representative verification cases are documented in
-[references/evidence.md](references/evidence.md). The supplied FBP cleavage
-example deliberately exposes a protonation imbalance; the checker detects it.
-Unit tests include formal phosphate transfer, triose phosphate isomerization,
-multi-product cleavage, symmetry, repeated components, and invalid mappings.
-They are structural regression tests, **not** a biochemical accuracy benchmark.
+</details>
 
 ## Research use and citation
 
 Version 0.1.0. Maintainer: [LGJee](https://github.com/LGJee).
-Use CITATION.cff for repository citation metadata. Record the version and exact
-Git commit used in a study, and cite the original databases and literature that
-support individual atom assignments. No DOI has been assigned.
+Use [CITATION.cff](CITATION.cff) and record the exact commit used in your study.
+Also cite the original sources supporting each atom assignment.
+No DOI has been assigned.
 
-No accuracy percentage is claimed. This release has not been benchmarked
-against an independent, expert-curated set of enzymatic atom mappings.
-Third-party data, mapper models, and their licenses are not included.
+Atom-map identifiers are local to each reaction, not automatically biochemical
+C1, C2, etc. A structurally consistent mapping can still be mechanistically
+wrong. Unresolved assignments must remain qualified.
 
-The original skill instructions and validator are distributed under the MIT
-License. Please retain the source citations when reusing the evidence notes.
+See [references/evidence.md](references/evidence.md) for evidence sources.
+Tests are structural regression checks, not a biochemical accuracy benchmark.
+No accuracy percentage is claimed. Third-party data and mapper models are
+not included. The original skill and checker use the MIT License; retain
+source citations when reusing the evidence notes.
