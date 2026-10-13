@@ -27,11 +27,14 @@ The installer does not overwrite an existing installation.
 
 ~~~text
 $enzymatic-atom-mapping
-REACTANT_SMILES>>PRODUCT_SMILES
+C([C@@H]1[C@H]([C@@H]([C@](O1)(COP(=O)([O-])[O-])O)O)O)OP(=O)([O-])[O-]>>C(C(=O)COP(=O)(O)O)O.C(C(C=O)O)OP(=O)(O)O
 ~~~
 
-Replace the placeholder with your reaction. If you selected the skill in the
-picker, paste only the reaction.
+Copy this example to try the skill, or replace it with your own reaction.
+If you selected the skill in the picker, paste only the reaction.
+
+This example has different protonation states on the two sides.
+The skill should report the imbalance without changing your structures.
 
 SMILES describes a molecule as text. `>>` separates reactants from products;
 `.` separates molecules on the same side. You do not need to number atoms first.
@@ -58,19 +61,6 @@ is unclear. You can ask in Chinese or English; results are currently in English.
 The agent needs web access for research. LocalMapper, RXNMapper, and EnzymeMap
 are optional. Python with RDKit is needed only for automated structural checks.
 Installing the skill does not install these dependencies.
-
-<details>
-<summary>Copyable example: a sugar splits into two products</summary>
-
-~~~text
-$enzymatic-atom-mapping
-C([C@@H]1[C@H]([C@@H]([C@](O1)(COP(=O)([O-])[O-])O)O)O)OP(=O)([O-])[O-]>>C(C(=O)COP(=O)(O)O)O.C(C(C=O)O)OP(=O)(O)O
-~~~
-
-This example has different protonation states on the two sides.
-The skill should report the imbalance without changing your structures.
-
-</details>
 
 <details>
 <summary>Optional: manual installation</summary>
