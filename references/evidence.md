@@ -69,7 +69,7 @@ stereochemistry need their own scope-qualified assessment.
 ## Symmetry and repeated molecules
 
 Symmetry can permit multiple equivalent representations of a correspondence.
-Distinguish a graph automorphism from a experimentally distinguishable atom
+Distinguish a graph automorphism from an experimentally distinguishable atom
 history. Position-specific isotopic labels or enzyme stereoselectivity can break
 an apparent symmetry. Report alternatives when the evidence does not resolve
 them. Repeated molecules need distinct reaction-local atom maps even if their
