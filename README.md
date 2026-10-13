@@ -16,12 +16,12 @@ Open Codex and paste this request into the chat:
 
 ~~~text
 Use $skill-installer to install the skill from:
-https://github.com/LGJee/enzymatic-atom-mapping
+https://github.com/LGJee/enzymatic-atom-mapping-skill
 
 The SKILL.md file is at the repository root. Install that root directory
 as a skill named enzymatic-atom-mapping in my user skills directory.
 If using install-skill-from-github.py, use:
---repo LGJee/enzymatic-atom-mapping --path . --name enzymatic-atom-mapping
+--repo LGJee/enzymatic-atom-mapping-skill --path . --name enzymatic-atom-mapping
 ~~~
 
 Codex uses its bundled installer to download the files and install the skill.
