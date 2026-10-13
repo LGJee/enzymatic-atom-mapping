@@ -43,3 +43,8 @@ Use English and include:
 
 When no unique assignment is supported, return what is established and the alternatives or missing evidence. Do not fabricate confidence percentages or describe the entire reaction as verified when only its carbon skeleton was checked.
 
+## Maintain and publish this skill
+
+When the user requests changes to this installed skill, finish and validate the changes, synchronize them to the default branch of https://github.com/LGJee/enzymatic-atom-mapping-skill, and verify the published files. This workflow applies to skill maintenance, not reaction analysis.
+
+After publication succeeds, back up the local skill directory outside its installation path, uninstall that local copy, and use skill-installer to download the repository root again as enzymatic-atom-mapping, pinned to the verified published commit. Verify the downloaded files against that commit and run skill validation and structural tests on the fresh installation before reporting completion. Do not leave local-only edits as the installed version. If installation fails, restore the backup and report that reinstalling the published version remains unfinished.
